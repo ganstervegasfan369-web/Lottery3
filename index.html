@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Professional Lottery Result Simulator</title>
+
+<style>
+:root{
+  --gold:#facc15;
+  --red:#c81e1e;
+  --blue:#1e40af;
+  --dark:#020617;
+  --light:#f8fafc;
+}
+
+body{
+  margin:0;
+  background:#000;
+  font-family: Arial, Helvetica, sans-serif;
+  color:#fff;
+}
+
+/* ====== FRAME ====== */
+.app{
+  max-width:1000px;
+  margin:20px auto;
+  border:8px solid var(--gold);
+  background:#000;
+}
+
+/* ====== TOP ====== */
+.top-banner{
+  background:linear-gradient(90deg,#991b1b,#facc15,#1d4ed8);
+  text-align:center;
+  padding:10px;
+  font-size:22px;
+  font-weight:bold;
+}
+
+.sub-banner{
+  background:#1e3a8a;
+  text-align:center;
+  padding:6px;
+  font-size:18px;
+}
+
+/* ====== RESULT AREA ====== */
+.result-area{
+  position:relative;
+  background:#e5e7eb;
+  padding:40px 90px;
+  display:flex;
+  justify-content:center;
+}
+
+.side{
+  position:absolute;
+  top:0;
+  bottom:0;
+  width:70px;
+  background:#dc2626;
+  writing-mode:vertical-rl;
+  text-align:center;
+  font-size:24px;
+  font-weight:bold;
+  padding:10px 0;
+}
+.side.left{left:-70px}
+.side.right{right:-70px}
+
+.curtain{
+  position:absolute;
+  top:0;
+  width:70px;
+  height:100%;
+  background:#111;
+}
+.curtain.left{left:0}
+.curtain.right{right:0}
+
+.result-window{
+  background:#f9fafb;
+  border:6px solid #9ca3af;
+  padding:20px 30px;
+  display:flex;
+  gap:12px;
+}
+
+.digit{
+  width:72px;
+  height:94px;
+  background:#fff;
+  border:3px solid #000;
+  font-size:64px;
+  font-weight:bold;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-family:"Courier New", monospace;
+}
+
+/* ====== FOOTER INFO ====== */
+.bottom-bar{
+  background:#facc15;
+  color:#000;
+  display:flex;
+  justify-content:space-between;
+  padding:10px 14px;
+  font-weight:bold;
+}
+
+/* ====== ADMIN PANEL ====== */
+.admin{
+  background:#020617;
+  padding:14px;
+  border-top:4px solid var(--gold);
+}
+
+.admin h3{
+  margin:6px 0;
+  color:#facc15;
+}
+
+.admin input,
+.admin button,
+.admin select{
+  margin:4px;
+  padding:6px;
+}
+
+.admin label{
+  font-size:13px;
+  color:#cbd5f5;
+}
+
+/* ====== HISTORY ====== */
+.history{
+  font-family:monospace;
+  max-height:180px;
+  overflow:auto;
+  background:#020617;
+  padding:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <!-- DISPLAY TEXTS -->
+  <div class="top-banner" id="titleText">GOVERNMENT STATE LOTTERIES</div>
+  <div class="sub-banner" id="subTitleText">DEAR EDUCATIONAL LOTTERY – WEEKLY DRAW</div>
+
+  <div class="result-area">
+    <div class="side left" id="leftText">LIVE DRAW</div>
+    <div class="side right" id="rightText">DEAR 8 PM</div>
+
+    <div class="curtain left"></div>
+    <div class="curtain right"></div>
+
+    <div class="result-window" id="display">
+      <div class="digit">0</div>
+      <div class="digit">0</div>
+      <div class="digit">0</div>
+      <div class="digit">0</div>
+      <div class="digit">0</div>
+    </div>
+  </div>
+
+  <div class="bottom-bar">
+    <div>Draw Date: <span id="drawDate"></span></div>
+    <div>Draw Time: <span id="drawTime">8:00 PM</span></div>
+    <div id="venueText">LIVE FROM STUDIO</div>
+  </div>
+
+  <!-- ===== ADMIN CONTROLS ===== -->
+  <div class="admin">
+    <h3>Admin Controls (Educational)</h3>
+
+    <label>Force Result</label>
+    <input id="forceInput" maxlength="5">
+
+    <button onclick="startSpin()">SPIN</button>
+    <button onclick="randomSpin()">RANDOM</button>
+
+    <br>
+
+    <label>Spin Speed (ms)</label>
+    <input type="range" min="20" max="120" value="40" id="speedRange">
+    <span id="speedVal">40</span>
+
+    <label>Digit Delay (ms)</label>
+    <input type="range" min="100" max="400" value="150" id="delayRange">
+    <span id="delayVal">150</span>
+
+    <h3>Text Customization</h3>
+
+    <input placeholder="Top Title" oninput="titleText.textContent=this.value">
+    <input placeholder="Sub Title" oninput="subTitleText.textContent=this.value">
+    <input placeholder="Left Ribbon" oninput="leftText.textContent=this.value">
+    <input placeholder="Right Ribbon" oninput="rightText.textContent=this.value">
+    <input placeholder="Venue Text" oninput="venueText.textContent=this.value">
+    <input placeholder="Draw Time" oninput="drawTime.textContent=this.value">
+
+  </div>
+
+  <div class="history" id="history"></div>
+
+</div>
+
+<script>
+const digits = document.querySelectorAll('.digit');
+const historyBox = document.getElementById('history');
+
+const speedRange = document.getElementById('speedRange');
+const delayRange = document.getElementById('delayRange');
+const speedVal = document.getElementById('speedVal');
+const delayVal = document.getElementById('delayVal');
+
+speedRange.oninput = () => speedVal.textContent = speedRange.value;
+delayRange.oninput = () => delayVal.textContent = delayRange.value;
+
+function random5(){
+  return Math.floor(Math.random()*100000).toString().padStart(5,'0');
+}
+
+function spin(final){
+  digits.forEach((d,i)=>{
+    let interval = setInterval(()=>{
+      d.textContent = Math.floor(Math.random()*10);
+    }, speedRange.value);
+
+    setTimeout(()=>{
+      clearInterval(interval);
+      d.textContent = final[i];
+      if(i===4){
+        const div=document.createElement('div');
+        div.textContent=final;
+        historyBox.prepend(div);
+      }
+    }, 500 + i*delayRange.value);
+  });
+}
+
+function startSpin(){
+  const v=document.getElementById('forceInput').value;
+  spin(/^\d{5}$/.test(v)?v:random5());
+}
+function randomSpin(){ spin(random5()); }
+
+document.getElementById('drawDate').textContent =
+  new Date().toLocaleDateString();
+</script>
+
+</body>
+</html>
